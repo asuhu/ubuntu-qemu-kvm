@@ -1,9 +1,5 @@
 #!/bin/bash
 
-
-
-#!/bin/bash
-
 set -e
 
 NETPLAN_FILE="/etc/netplan/99-custom-bridge.yaml"
