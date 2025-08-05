@@ -112,6 +112,8 @@ sudo systemctl restart chronyd
 sleep 1
 echo "[9/12] 安装并配置 chrony 使用阿里云 NTP 服务器..."
 
+sudo timedatectl set-timezone Asia/Shanghai
+
 # 安装 chrony 时间同步服务
 sudo apt install -y chrony
 
