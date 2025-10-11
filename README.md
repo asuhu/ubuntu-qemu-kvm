@@ -6,6 +6,8 @@
  
      <h2>Screenshot-截图</h2>
 INSTANCE
- <img src="https://raw.githubusercontent.com/asuhu/ubuntu-qemu-kvm/refs/heads/main/instance.PNG"  alt="virsh version" />
+ <img src="https://raw.githubusercontent.com/asuhu/ubuntu-qemu-kvm/refs/heads/main/Pic/instance.PNG"  alt="INSTANCE" />
  noVNC
- <img src="https://raw.githubusercontent.com/asuhu/ubuntu-qemu-kvm/refs/heads/main/noVNC.PNG"  alt="virsh version" />
+ <img src="https://raw.githubusercontent.com/asuhu/ubuntu-qemu-kvm/refs/heads/main/Pic/noVNC.PNG"  alt=" noVNC" />
+ vnc_html
+ <img src="https://raw.githubusercontent.com/asuhu/ubuntu-qemu-kvm/refs/heads/main/Pic/vnc_html.PNG"  alt=" noVNC" />
