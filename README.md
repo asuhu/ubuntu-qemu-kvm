@@ -11,3 +11,5 @@ INSTANCE
  <img src="https://raw.githubusercontent.com/asuhu/ubuntu-qemu-kvm/refs/heads/main/Pic/noVNC.PNG"  alt=" noVNC" />
  vnc_html
  <img src="https://raw.githubusercontent.com/asuhu/ubuntu-qemu-kvm/refs/heads/main/Pic/vnc_html.PNG"  alt=" noVNC" />
+  vnc_html_2019
+ <img src="https://raw.githubusercontent.com/asuhu/ubuntu-qemu-kvm/refs/heads/main/Pic/vnc_html_2019.PNG"  alt=" noVNC" />
