@@ -71,3 +71,10 @@ echo "[SUCCESS] Bond + Bridge 网络配置完成！"
 nmcli connection show --active
 ip route show
 cat /proc/net/bonding/bond0
+#| 0        | balance-rr             | 轮询
+#| 1        | active-backup       | 主备
+#| 2        | balance-xor           | 异或负载
+#| 3        | broadcast              | 广播
+#| 4        | 802.3ad                 | LACP 动态聚合（需交换机支持）
+#| 5        | balance-tlb           | 传输负载均衡
+#| 6        | balance-alb          | 自适应负载均衡（推荐）

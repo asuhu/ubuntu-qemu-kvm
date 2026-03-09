@@ -28,74 +28,6 @@ else
 fi
 sleep 1
 
-echo "[2/8] 安装 KVM 及相关组件..."
-if [[ "$OS_ID" =~ (ubuntu|debian) ]]; then
-    echo "[2/8] 安装 KVM 及相关组件..."
-    # 更新软件源
-    sudo apt update -y
-    # 安装 KVM 和相关工具
-    sudo apt install -y \
-        qemu-kvm libvirt-clients libvirt-daemon-system libvirt-clients bridge-utils virt-manager virt-v2v \
-        libosinfo-bin ovmf libguestfs-tools
-    # 启用 libvirt 服务
-    sudo systemctl enable --now libvirtd || sudo systemctl enable --now libvirt-bin
-fi
-sleep 1
-
-
-echo "[3/8] 开始优化 libvirt 配置..."
-CONF_LIBVIRTD="/etc/libvirt/libvirtd.conf"
-# 备份配置文件
-cp -p "$CONF_LIBVIRTD" "${CONF_LIBVIRTD}.$(date +%F_%H%M%S).bak"
-echo "已备份 libvirtd.conf 到 ${CONF_LIBVIRTD}.$(date +%F_%H%M%S).bak"
-# 禁用 TLS、禁用 TCP（本地使用 Unix socket 即可）、关闭 libvirt TCP 监听功能。
-sed -i 's/^#\?\s*listen_tls\s*=.*/listen_tls = 0/' "$CONF_LIBVIRTD"
-sed -i 's/^#\?\s*tcp_port\s*=.*/tcp_port = ""/' "$CONF_LIBVIRTD"
-sed -i 's/^#\?\s*listen_tcp\s*=.*/listen_tcp = 0/' "$CONF_LIBVIRTD"
-# 日志
-sed -i 's@^#\?\s*log_outputs\s*=.*@log_outputs="1:file:/var/log/libvirt/libvirtd.log"@' "$CONF_LIBVIRTD"
-
-
-# 检查是否已存在 qemu 用户
-if id qemu &>/dev/null; then
-    echo "用户 qemu 已存在"
-else
-    echo "用户 qemu 不存在，正在创建..."
-    sudo useradd --system --no-create-home --shell /usr/sbin/nologin --comment "QEMU virtualization user" qemu
-    if id qemu &>/dev/null; then
-        echo "用户 qemu 创建成功"
-    else
-        echo "用户 qemu 创建失败，请检查权限或系统用户限制"
-        exit 1
-    fi
-fi
-#把 qemu 用户加入 kvm 组
-usermod -aG kvm qemu
-
-
-echo "[4/8] 开始优化 qemu 权限和安全..."
-CONF_QEMU="/etc/libvirt/qemu.conf"
-# 备份配置文件
-cp -p "$CONF_QEMU" "${CONF_QEMU}.$(date +%F_%H%M%S).bak"
-echo "已备份 qemu.conf 到 ${CONF_QEMU}.$(date +%F_%H%M%S).bak"
-sed -i 's/^#\?\s*user\s*=.*/user = "qemu"/' "$CONF_QEMU"
-sed -i 's/^#\?\s*group\s*=.*/group = "qemu"/' "$CONF_QEMU"
-sed -i 's/^#\?\s*security_driver\s*=.*/security_driver = "none"/' "$CONF_QEMU"
-#security_driver 默认值通常是 selinux 或 apparmor，用于在宿主机层面给每个虚拟机进程加安全沙箱。
-
-#日志
-#sudo journalctl -xeu libvirtd
-#sudo cat /var/log/libvirt/libvirtd.log
-
-systemctl daemon-reexec
-systemctl daemon-reload
-systemctl restart libvirtd
-
-echo "[5/8] 启动并检查 libvirtd 服务..."
-systemctl enable --now libvirtd
-systemctl status libvirtd --no-pager
-sleep 1
-
 #######################################
 # QEMU 源码编译
 #######################################
@@ -150,8 +82,8 @@ fi
 
 echo "[2/8] 下载 QEMU 源码..."
 cd /opt
-OFFICIAL_BASE="https://download.qemu.org"
-BACKUP_BASE="http://10.53.123.144/kvm"
+OFFICIAL_BASE="http://10.53.220.22:8080/mp4/"
+BACKUP_BASE="http://10.53.220.22:8080/mp4/"
 
 # 下载函数
 download_qemu() {
@@ -236,6 +168,8 @@ sudo ln -sf ${PREFIX}/bin/qemu-img /usr/bin/qemu-img
 
 echo "安装完成！验证版本："
 qemu-system-x86_64 --version
+#把 qemu 用户加入 kvm 组
+usermod -aG kvm qemu
 #######################################
 # 嵌套虚拟化与 IOMMU 直通
 #######################################

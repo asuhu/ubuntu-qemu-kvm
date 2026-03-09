@@ -34,7 +34,8 @@ sudo apt update -y
 sudo apt upgrade -y
 sudo apt install -y \
 git build-essential vim curl htop gcc python3 python3-pip openjdk-11-jdk net-tools nmap vlc ffmpeg gimp inkscape libreoffice zip unzip tar sysstat strace \
-fail2ban clamav libssl-dev libcurl4-openssl-dev ntpdate chrony iftop iotop
+fail2ban clamav libssl-dev libcurl4-openssl-dev ntpdate chrony iftop iotop smartmontools qemu-guest-agent
+
 sudo apt remove vim-common -y && sudo apt install vim -y
 sleep 1
 echo "[5/12] 完全禁用 Cloud-Init.."
@@ -174,3 +175,38 @@ agentAddress udp:161
 
 # 定义允许读取所有 OID 的视图
 view    systemview    included   .1
+
+#[12/12]扩容根分区到整个磁盘
+echo "[INFO] 检测根分区挂载点..."
+ROOT_DEV=$(df / | tail -1 | awk '{print $1}')
+
+echo "[INFO] 根分区设备: $ROOT_DEV"
+
+# 检查是否为 LVM
+if [[ "$ROOT_DEV" != /dev/mapper/* ]]; then
+    echo "[ERROR] 根分区不是 LVM，无法扩容。"
+    exit 1
+fi
+
+echo "[INFO] 检测文件系统类型..."
+FS_TYPE=$(df -Th / | tail -1 | awk '{print $2}')
+echo "[INFO] 文件系统类型: $FS_TYPE"
+
+echo "[INFO] 解析 LVM 设备路径..."
+LV_PATH="$ROOT_DEV"
+
+echo "[INFO] 扩容 LVM 到全部剩余空间..."
+sudo lvextend -l +100%FREE "$LV_PATH"
+
+# 根据文件系统类型选择扩容方式
+if [[ "$FS_TYPE" == "ext4" ]]; then
+    echo "[INFO] 检测到 ext4 文件系统，使用 resize2fs 扩容..."
+    sudo resize2fs "$LV_PATH"
+elif [[ "$FS_TYPE" == "xfs" ]]; then
+    echo "[INFO] 检测到 xfs 文件系统，使用 xfs_growfs 扩容..."
+    sudo xfs_growfs /
+else
+    echo "[ERROR] 不支持的文件系统类型：$FS_TYPE"
+    exit 1
+fi
+echo "[SUCCESS] 根分区扩容完成！"
